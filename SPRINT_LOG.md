@@ -9,23 +9,29 @@
 - [x] Chrome extension scaffold created
 - [x] Chrome extension tested - WORKING PERFECTLY!
 
-### Decisions:
-- Using Manifest V3 for Chrome extension
-- Trust dynamics as standalone ES6 module
-- Located in PROJECT_SUBSTRATE for organization
-
-### Blockers:
-- None! Everything working as expected
-
 ### Key Achievement:
 Working Chrome extension that logs trust dynamics (λ=0.15) to console on every page
 
 ---
 
-## Day 2 Preview - July 15, 2025
+## Day 2 - July 15, 2025 ✅
 ### Goal: Add WebGL visualization
+### Progress:
+- [x] Canvas visualization implemented
+- [x] 3 agents with trust connections visible
+- [x] Trust decay animation working (green→yellow→red)
+- [x] 60 FPS performance achieved
+- [x] Visual overlay on all websites
+
+### Key Achievement:
+FIRST EVER real-time visualization of trust decay! Particles change from green to red as trust decays.
+
+---
+
+## Day 3 Preview - July 16, 2025
+### Goal: Pattern detection
 ### Planned:
-- [ ] Integrate Three.js into content script
-- [ ] Create particle system for agents
-- [ ] Show trust network edges
-- [ ] Achieve 60 FPS with 100+ particles
+- [ ] Detect semantic drift between agents
+- [ ] Show trust collapse warnings
+- [ ] Add coordination failure alerts
+- [ ] Create pattern history log
