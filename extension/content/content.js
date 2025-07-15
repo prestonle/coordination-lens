@@ -5,6 +5,16 @@ class AIResponseCapture {
     constructor() {
         this.responses = [];
         this.isCapturing = false;
+        this.settings = {
+            monitoringEnabled: true,
+            redFlashEnabled: true,
+            divergenceThreshold: 200
+        };
+        
+        // Load settings
+        this.loadSettings();
+        
+        // Set up platform detection
         this.detectPlatform();
         this.createVisualAlert();
         
@@ -13,6 +23,20 @@ class AIResponseCapture {
             if (changes.latestResponses) {
                 this.checkForDivergence();
             }
+            if (changes.monitoringEnabled || changes.redFlashEnabled || changes.divergenceThreshold) {
+                this.loadSettings();
+            }
+        });
+    }
+
+    loadSettings() {
+        chrome.storage.sync.get(['monitoringEnabled', 'redFlashEnabled', 'divergenceThreshold'], (result) => {
+            this.settings = {
+                monitoringEnabled: result.monitoringEnabled !== false,
+                redFlashEnabled: result.redFlashEnabled !== false,
+                divergenceThreshold: result.divergenceThreshold || 200
+            };
+            console.log('📋 Settings loaded:', this.settings);
         });
     }
 
@@ -39,6 +63,8 @@ class AIResponseCapture {
     }
 
     showAlert(message) {
+        if (!this.settings.monitoringEnabled) return;
+        
         this.alertDiv.textContent = message;
         this.alertDiv.style.display = 'block';
         
@@ -63,6 +89,8 @@ class AIResponseCapture {
     }
 
     startChatGPTCapture() {
+        if (!this.settings.monitoringEnabled) return;
+        
         this.isCapturing = true;
         
         const observer = new MutationObserver(() => {
@@ -87,6 +115,8 @@ class AIResponseCapture {
     }
 
     startClaudeCapture() {
+        if (!this.settings.monitoringEnabled) return;
+        
         this.isCapturing = true;
         
         const observer = new MutationObserver(() => {
@@ -111,6 +141,8 @@ class AIResponseCapture {
     }
 
     logResponse(agent, text) {
+        if (!this.settings.monitoringEnabled) return;
+        
         const isDupe = this.responses.some(r => 
             r.fullText === text && r.agent === agent
         );
@@ -127,9 +159,26 @@ class AIResponseCapture {
             this.responses.push(response);
             console.log(`📝 Captured ${agent} response:`, response);
             
-            // Store in Chrome storage for cross-tab access
+            // Store locally for export
+            this.storeForExport(response);
+            
+            // Share across tabs
             this.shareResponse(response);
         }
+    }
+    
+    storeForExport(response) {
+        chrome.storage.local.get(['coordinationLogs'], (result) => {
+            const logs = result.coordinationLogs || [];
+            logs.push(response);
+            
+            // Keep only last 1000 entries to avoid storage issues
+            if (logs.length > 1000) {
+                logs.shift();
+            }
+            
+            chrome.storage.local.set({ coordinationLogs: logs });
+        });
     }
     
     shareResponse(response) {
@@ -145,6 +194,8 @@ class AIResponseCapture {
     }
     
     checkForDivergence() {
+        if (!this.settings.monitoringEnabled) return;
+        
         chrome.storage.local.get(['latestResponses'], (result) => {
             const responses = result.latestResponses || {};
             
@@ -161,26 +212,30 @@ class AIResponseCapture {
                 let divergenceDetected = false;
                 let alertMessage = '';
                 
-                // Check for significant differences
+                // Check against threshold
+                if (lengthDiff > this.settings.divergenceThreshold) {
+                    divergenceDetected = true;
+                    alertMessage = `⚠️ AI Divergence: Response lengths differ by ${lengthDiff} characters`;
+                    console.log(alertMessage);
+                }
+                
+                // Check for content differences
                 if (gptLower.includes('spooky') && !claudeLower.includes('spooky')) {
                     divergenceDetected = true;
                     alertMessage = '⚠️ AI Divergence: ChatGPT mentions "spooky action" but Claude doesn\'t';
                     console.log(alertMessage);
                 }
                 
-                if (lengthDiff > 200) {
-                    divergenceDetected = true;
-                    alertMessage = `⚠️ AI Divergence: Response lengths differ by ${lengthDiff} characters`;
-                    console.log(alertMessage);
-                }
-                
                 if (divergenceDetected) {
                     this.showAlert(alertMessage);
-                    // Flash the page border
-                    document.body.style.border = '3px solid #ff4444';
-                    setTimeout(() => {
-                        document.body.style.border = '';
-                    }, 3000);
+                    
+                    // Flash the page border if enabled
+                    if (this.settings.redFlashEnabled) {
+                        document.body.style.border = '3px solid #ff4444';
+                        setTimeout(() => {
+                            document.body.style.border = '';
+                        }, 3000);
+                    }
                 }
                 
                 console.log('📊 Length difference:', lengthDiff, 'characters');

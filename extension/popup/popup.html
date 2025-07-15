@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CoordinationLens Settings</title>
+    <style>
+        body {
+            width: 350px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .setting {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .setting label {
+            flex: 1;
+            margin-right: 10px;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        input[type="range"] {
+            width: 150px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #exportBtn {
+            background: #2196F3;
+        }
+        #exportBtn:hover {
+            background: #0b7dda;
+        }
+        #status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .threshold-value {
+            font-weight: bold;
+            margin-left: 10px;
+            min-width: 50px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 CoordinationLens</h1>
+    
+    <div class="setting">
+        <label for="monitoringEnabled">Enable Monitoring</label>
+        <input type="checkbox" id="monitoringEnabled" checked>
+    </div>
+    
+    <div class="setting">
+        <label for="redFlashEnabled">Red Flash Alert</label>
+        <input type="checkbox" id="redFlashEnabled" checked>
+    </div>
+    
+    <div class="setting">
+        <label for="divergenceThreshold">
+            Divergence Threshold
+            <span class="threshold-value" id="thresholdValue">200</span> chars
+        </label>
+        <input type="range" id="divergenceThreshold" min="50" max="1000" value="200" step="50">
+    </div>
+    
+    <div class="setting">
+        <label for="exportFormat">Export Format</label>
+        <select id="exportFormat">
+            <option value="both">Both JSON & CSV</option>
+            <option value="json">JSON Only</option>
+            <option value="csv">CSV Only</option>
+        </select>
+    </div>
+    
+    <div style="margin-top: 20px; text-align: center;">
+        <button id="exportBtn">📥 Export Logs</button>
+        <button id="saveBtn">💾 Save Settings</button>
+    </div>
+    
+    <div id="status"></div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -3,9 +3,9 @@
   "name": "CoordinationLens",
   "version": "0.1.0",
   "description": "See AI coordination in real-time",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "downloads"],
   "action": {
-    "default_popup": "popup/index.html"
+    "default_popup": "popup/popup.html"
   },
   "content_scripts": [
     {
