@@ -34,3 +34,8 @@ CoordinationLens monitors AI conversations and alerts you when different AIs giv
 This is a research prototype exploring AI coordination monitoring. Not intended for production use.
 
 Part of PROJECT_SUBSTRATE - investigating coordination as fundamental substrate of intelligence.
+
+## Version 1.1 (Coming Soon)
+- ✨ **Semantic Similarity**: Replaced character count with Jaccard word analysis
+- 🎯 **Real Divergence Detection**: Catches actual disagreements, not just length differences
+- 💡 **Actionable Insights**: Recommendations based on divergence levels
