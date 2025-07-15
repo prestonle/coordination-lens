@@ -1,4 +1,4 @@
-// CoordinationLens - Real AI Response Detector with Cross-Tab Comparison
+// CoordinationLens - Real AI Response Detector with Visual Alerts
 console.log("🔍 CoordinationLens activated on:", window.location.href);
 
 class AIResponseCapture {
@@ -6,6 +6,7 @@ class AIResponseCapture {
         this.responses = [];
         this.isCapturing = false;
         this.detectPlatform();
+        this.createVisualAlert();
         
         // Listen for messages from other tabs
         chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -13,6 +14,38 @@ class AIResponseCapture {
                 this.checkForDivergence();
             }
         });
+    }
+
+    createVisualAlert() {
+        // Create alert container
+        this.alertDiv = document.createElement('div');
+        this.alertDiv.id = 'coordination-lens-alert';
+        this.alertDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            z-index: 999999;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 300px;
+        `;
+        document.body.appendChild(this.alertDiv);
+    }
+
+    showAlert(message) {
+        this.alertDiv.textContent = message;
+        this.alertDiv.style.display = 'block';
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            this.alertDiv.style.display = 'none';
+        }, 10000);
     }
 
     detectPlatform() {
@@ -120,20 +153,37 @@ class AIResponseCapture {
                 console.log('ChatGPT:', responses.ChatGPT.text);
                 console.log('Claude:', responses.Claude.text);
                 
-                // Simple divergence check - do they mention different key concepts?
+                // Check for divergence
                 const gptLower = responses.ChatGPT.fullText.toLowerCase();
                 const claudeLower = responses.Claude.fullText.toLowerCase();
+                const lengthDiff = Math.abs(responses.ChatGPT.length - responses.Claude.length);
+                
+                let divergenceDetected = false;
+                let alertMessage = '';
                 
                 // Check for significant differences
                 if (gptLower.includes('spooky') && !claudeLower.includes('spooky')) {
-                    console.log('⚠️ DIVERGENCE DETECTED: ChatGPT mentions "spooky action" but Claude doesn\'t');
+                    divergenceDetected = true;
+                    alertMessage = '⚠️ AI Divergence: ChatGPT mentions "spooky action" but Claude doesn\'t';
+                    console.log(alertMessage);
                 }
                 
-                if (Math.abs(responses.ChatGPT.length - responses.Claude.length) > 200) {
-                    console.log('⚠️ DIVERGENCE DETECTED: Response lengths differ significantly');
+                if (lengthDiff > 200) {
+                    divergenceDetected = true;
+                    alertMessage = `⚠️ AI Divergence: Response lengths differ by ${lengthDiff} characters`;
+                    console.log(alertMessage);
                 }
                 
-                console.log('📊 Length difference:', Math.abs(responses.ChatGPT.length - responses.Claude.length), 'characters');
+                if (divergenceDetected) {
+                    this.showAlert(alertMessage);
+                    // Flash the page border
+                    document.body.style.border = '3px solid #ff4444';
+                    setTimeout(() => {
+                        document.body.style.border = '';
+                    }, 3000);
+                }
+                
+                console.log('📊 Length difference:', lengthDiff, 'characters');
             }
         });
     }
