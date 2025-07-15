@@ -1,3 +1,22 @@
+// Load the coordination analyzer
+const analyzer = new CoordinationAnalyzer();
+
+// Enhanced divergence detection
+function detectSemanticDivergence(response1, response2) {
+  const analysis = analyzer.detectDivergence(response1, response2);
+  
+  // Log for debugging
+  console.log('[CoordinationLens] Semantic Analysis:', {
+    divergence: `${(analysis.divergence * 100).toFixed(1)}%`,
+    recommendation: analysis.recommendation,
+    uniqueTerms: {
+      first: analysis.uniqueToFirst,
+      second: analysis.uniqueToSecond
+    }
+  });
+  
+  return analysis;
+}
 // CoordinationLens - Real-time AI Coordination Monitoring
 console.log('%c🔍 CoordinationLens v0.1.0', 'color: #00ff00; font-weight: bold; font-size: 16px');
 console.log('%cMaking AI coordination failures visible for the first time', 'color: #40c0cb; font-style: italic');
@@ -355,3 +374,4 @@ console.log('%c📊 CoordinationLens ready', 'color: #40c0cb; font-weight: bold'
 console.log(`• ${coordinationLog.length} events logged`);
 console.log('• Export formats: JSON, CSV');
 console.log('%c💡 Hover over trust meter for details', 'color: #ffff00');
+

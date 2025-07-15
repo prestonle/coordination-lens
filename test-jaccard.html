@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CoordinationLens Jaccard Test</title>
+  <style>
+    body { font-family: Arial; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    textarea { width: 100%; height: 200px; font-family: monospace; }
+    .results { background: #f0f0f0; padding: 15px; margin-top: 20px; border-radius: 8px; }
+    .metric { padding: 8px 0; }
+    .old { color: #d00; }
+    .new { color: #0a0; }
+    .recommendation { background: #fffacd; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    button { background: #007acc; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #005a9e; }
+  </style>
+</head>
+<body>
+  <h1>🔬 CoordinationLens: Jaccard vs Character Count</h1>
+  
+  <div class="container">
+    <div>
+      <h3>Response 1 (e.g., ChatGPT)</h3>
+      <textarea id="response1" placeholder="Paste first AI response here..."></textarea>
+    </div>
+    <div>
+      <h3>Response 2 (e.g., Claude)</h3>
+      <textarea id="response2" placeholder="Paste second AI response here..."></textarea>
+    </div>
+  </div>
+  
+  <button onclick="compareDetection()">🔍 Compare Detection Methods</button>
+  
+  <div id="results" class="results" style="display:none;"></div>
+  
+  <script src="extension/content/coordination-analyzer.js"></script>
+  <script>
+    function oldCharacterMethod(r1, r2) {
+      return Math.abs(r1.length - r2.length) / Math.max(r1.length, r2.length);
+    }
+    
+    function compareDetection() {
+      const r1 = document.getElementById('response1').value;
+      const r2 = document.getElementById('response2').value;
+      
+      if (!r1 || !r2) {
+        alert('Please paste responses in both fields');
+        return;
+      }
+      
+      const oldDivergence = oldCharacterMethod(r1, r2);
+      
+      const analyzer = new CoordinationAnalyzer();
+      const newAnalysis = analyzer.detectDivergence(r1, r2);
+      
+      document.getElementById('results').innerHTML = `
+        <h3>📊 Detection Results</h3>
+        <div class="metric old"><strong>OLD (Character Count):</strong> ${(oldDivergence * 100).toFixed(1)}% divergence</div>
+        <div class="metric new"><strong>NEW (Jaccard Similarity):</strong> ${(newAnalysis.divergence * 100).toFixed(1)}% divergence</div>
+        <div class="recommendation"><strong>💡 Recommendation:</strong> ${newAnalysis.recommendation}</div>
+        <div class="metric"><strong>🔤 Unique to Response 1:</strong> ${newAnalysis.uniqueToFirst.join(', ') || 'None'}</div>
+        <div class="metric"><strong>🔤 Unique to Response 2:</strong> ${newAnalysis.uniqueToSecond.join(', ') || 'None'}</div>
+        <hr>
+        <div class="metric"><strong>Character lengths:</strong> ${r1.length} vs ${r2.length}</div>
+      `;
+      document.getElementById('results').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
