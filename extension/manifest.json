@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "CoordinationLens",
+  "version": "0.1.0",
+  "description": "See AI coordination in real-time",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+    "default_popup": "popup/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content.js"]
+    }
+  ]
+}
