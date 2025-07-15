@@ -1,0 +1,444 @@
+// CoordinationLens - Real-time AI Coordination Monitoring
+console.log('%c🔍 CoordinationLens v0.1.0', 'color: #00ff00; font-weight: bold; font-size: 16px');
+console.log('%cMaking AI coordination failures visible for the first time', 'color: #40c0cb; font-style: italic');
+console.log('Research-grade trust dynamics monitoring (λ=0.15) by Preston Lee Horn');
+console.log('GitHub: https://github.com/prestonle/coordination-lens');
+
+// Configuration
+const CONFIG = {
+    checkInterval: 5000,
+    trustDecayLambda: 0.15,
+    trustFloor: 0.05,
+    recoveryThreshold: 0.09,
+    defaultThreshold: 200,
+    maxStorageEvents: 1000,
+    debounceDelay: 300
+};
+
+// Get threshold from storage
+let divergenceThreshold = CONFIG.defaultThreshold;
+chrome.storage.sync.get(['threshold'], (result) => {
+    if (result.threshold) {
+        divergenceThreshold = result.threshold;
+        console.log(`Custom threshold loaded: ${divergenceThreshold} characters`);
+    }
+});
+
+// Initialize coordination log
+let coordinationLog = [];
+let isMonitoring = true;
+
+console.log('%c✅ Trust dynamics engine initialized', 'color: #00ff00');
+console.log('Monitoring for coordination drift between AI agents...');
+
+// Debouncing for performance
+let debounceTimer;
+function debouncedCompare() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(compareResponses, CONFIG.debounceDelay);
+}
+
+// Storage management with rotation
+function addToLog(event) {
+    coordinationLog.push(event);
+    
+    // Auto-archive when reaching limit
+    if (coordinationLog.length >= CONFIG.maxStorageEvents) {
+        const archiveData = {
+            timestamp: new Date().toISOString(),
+            events: coordinationLog
+        };
+        
+        // Archive to local storage
+        chrome.storage.local.set({
+            [`archive_${Date.now()}`]: archiveData
+        }, () => {
+            console.log('%c📦 Auto-archived 1000 coordination events', 'color: #ffff00');
+            console.log('Data preserved for research analysis');
+        });
+        
+        // Clear current log
+        coordinationLog = [];
+    }
+    
+    // Save to storage
+    chrome.storage.local.set({
+        coordinationLog: coordinationLog
+    });
+}
+
+// Trust dynamics implementation - User-friendly version
+class TrustDynamics {
+    constructor() {
+        this.agents = [
+            { id: 1, trust: 1.0, x: 150, y: 150, vx: 0, vy: 0, lastUpdate: Date.now() },
+            { id: 2, trust: 1.0, x: 250, y: 150, vx: 0, vy: 0, lastUpdate: Date.now() },
+            { id: 3, trust: 1.0, x: 200, y: 100, vx: 0, vy: 0, lastUpdate: Date.now() }
+        ];
+        this.patterns = [];
+        this.hasDetectedDivergence = false;
+        this.divergenceCount = 0;
+    }
+
+    update() {
+        const now = Date.now();
+        
+        // Only decay trust if we've detected divergence
+        if (this.hasDetectedDivergence) {
+            this.agents.forEach(agent => {
+                const deltaTime = (now - agent.lastUpdate) / 1000;
+                agent.trust = agent.trust * Math.exp(-CONFIG.trustDecayLambda * deltaTime);
+                agent.trust = Math.max(agent.trust, CONFIG.trustFloor);
+                agent.lastUpdate = now;
+            });
+        }
+
+        this.detectPatterns();
+    }
+
+    triggerDivergence(severity = 1) {
+        this.hasDetectedDivergence = true;
+        this.divergenceCount++;
+        
+        console.log('%c⚠️  COORDINATION DRIFT DETECTED', 'color: #ff8800; font-weight: bold');
+        console.log(`Divergence #${this.divergenceCount} - Severity: ${severity}/10`);
+        
+        // Immediate trust hit based on severity
+        const trustHit = Math.max(0.7, 1 - (severity * 0.1));
+        this.agents.forEach(agent => {
+            agent.trust = Math.max(agent.trust * trustHit, CONFIG.trustFloor);
+            agent.lastUpdate = Date.now();
+        });
+        
+        // Add some physics to show divergence
+        if (this.agents.length >= 2) {
+            this.agents[0].vx = -2;
+            this.agents[1].vx = 2;
+        }
+    }
+
+    detectPatterns() {
+        const avgTrust = this.agents.reduce((sum, a) => sum + a.trust, 0) / this.agents.length;
+        const trustVariance = this.agents.reduce((sum, a) => sum + Math.pow(a.trust - avgTrust, 2), 0) / this.agents.length;
+        
+        this.patterns = [];
+        
+        // Only show patterns if we've actually detected divergence
+        if (!this.hasDetectedDivergence) {
+            return;
+        }
+        
+        if (trustVariance > 0.3) {
+            this.patterns.push({
+                type: 'SEMANTIC_DRIFT',
+                severity: 'warning',
+                message: 'Agents diverging in semantic understanding'
+            });
+        }
+        
+        if (avgTrust < 0.3) {
+            this.patterns.push({
+                type: 'TRUST_COLLAPSE', 
+                severity: 'critical',
+                message: 'Critical trust degradation after ' + this.divergenceCount + ' divergences'
+            });
+            console.log('%c🚨 TRUST COLLAPSE - Coordination failure imminent', 'color: #ff0000; font-weight: bold');
+        } else if (avgTrust < 0.6) {
+            this.patterns.push({
+                type: 'TRUST_DEGRADATION',
+                severity: 'warning', 
+                message: 'Trust degrading - coordination at risk'
+            });
+        }
+        
+        // Recovery detection
+        if (this.hasDetectedDivergence && avgTrust > 0.8 && this.divergenceCount > 0) {
+            this.patterns.push({
+                type: 'RECOVERY',
+                severity: 'info',
+                message: 'Coordination recovering'
+            });
+            console.log('%c✅ Coordination recovering', 'color: #00ff00');
+        }
+    }
+}
+
+const trustDynamics = new TrustDynamics();
+
+// Create visual overlay
+const overlay = document.createElement('div');
+overlay.id = 'coordination-lens-overlay';
+overlay.style.cssText = `
+    position: fixed;
+    bottom: 20px; right: 20px;
+    width: 320px; height: 200px;
+    pointer-events: none;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.6); opacity: 0.5;
+    border: 2px solid #00ff00;
+    border-radius: 5px;
+`;
+
+// Canvas for visualization
+const canvas = document.createElement('canvas');
+canvas.width = 400;
+canvas.height = 300;
+canvas.style.cssText = 'width: 100%; height: 100%;';
+overlay.appendChild(canvas);
+
+// Status indicator
+const statusBar = document.createElement('div');
+statusBar.style.cssText = `
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    color: #00ff00;
+    font-family: monospace;
+    font-size: 12px;
+    text-shadow: 0 0 2px rgba(0,0,0,0.8);
+`;
+statusBar.textContent = 'Coordination: Healthy';
+overlay.appendChild(statusBar);
+
+// Pattern display panel
+const patternPanel = document.createElement('div');
+patternPanel.style.cssText = `
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+    max-height: 100px;
+    overflow-y: auto;
+`;
+overlay.appendChild(patternPanel);
+
+document.body.appendChild(overlay);
+
+const ctx = canvas.getContext('2d');
+
+console.log('Visual overlay created - Watch for trust decay in real-time');
+
+// Update status based on trust
+function updateStatus() {
+    const avgTrust = trustDynamics.agents.reduce((sum, a) => sum + a.trust, 0) / trustDynamics.agents.length;
+    
+    if (!trustDynamics.hasDetectedDivergence) {
+        statusBar.textContent = 'Coordination: Monitoring...';
+        statusBar.style.color = '#00ff00';
+    } else if (avgTrust > 0.7) {
+        statusBar.textContent = 'Coordination: Good';
+        statusBar.style.color = '#00ff00';
+    } else if (avgTrust > 0.4) {
+        statusBar.textContent = 'Coordination: Degrading';
+        statusBar.style.color = '#ffff00';
+    } else {
+        statusBar.textContent = 'Coordination: Critical';
+        statusBar.style.color = '#ff0000';
+    }
+}
+
+// Visualization update
+function updateVisualization() {
+    if (!isMonitoring) return;
+    
+    trustDynamics.update();
+    updateStatus();
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, 400, 300);
+    
+    // Update agent positions with physics
+    trustDynamics.agents.forEach(agent => {
+        agent.x += (agent.vx || 0);
+        agent.y += (agent.vy || 0);
+        
+        // Boundary bounce
+        if (agent.x < 20 || agent.x > 380) agent.vx = (agent.vx || 0) * -0.8;
+        if (agent.y < 20 || agent.y > 280) agent.vy = (agent.vy || 0) * -0.8;
+        
+        // Friction
+        agent.vx = (agent.vx || 0) * 0.95;
+        agent.vy = (agent.vy || 0) * 0.95;
+        
+        // Keep in bounds
+        agent.x = Math.max(20, Math.min(380, agent.x));
+        agent.y = Math.max(20, Math.min(280, agent.y));
+    });
+    
+    // Draw trust connections
+    trustDynamics.agents.forEach((agent, i) => {
+        trustDynamics.agents.slice(i + 1).forEach(other => {
+            const avgTrust = (agent.trust + other.trust) / 2;
+            ctx.strokeStyle = `rgba(0, 255, 0, ${avgTrust})`;
+            ctx.lineWidth = avgTrust * 3;
+            ctx.beginPath();
+            ctx.moveTo(agent.x, agent.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.stroke();
+        });
+    });
+    
+    // Draw agents
+    trustDynamics.agents.forEach(agent => {
+        const color = agent.trust > 0.5 ? '#00ff00' : agent.trust > 0.2 ? '#ffff00' : '#ff0000';
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(agent.x, agent.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add glow effect
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = color;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    });
+    
+    // Update pattern display
+    if (trustDynamics.patterns.length > 0) {
+        const timestamp = new Date().toLocaleTimeString();
+        trustDynamics.patterns.forEach(pattern => {
+            const alert = document.createElement('div');
+            alert.style.color = pattern.severity === 'critical' ? '#ff0000' : 
+                              pattern.severity === 'warning' ? '#ffff00' : '#00ffff';
+            alert.textContent = `[${timestamp}] ${pattern.type}: ${pattern.message}`;
+            patternPanel.appendChild(alert);
+            patternPanel.scrollTop = patternPanel.scrollHeight;
+            
+            addToLog({
+                timestamp: Date.now(),
+                type: 'pattern_detected',
+                pattern: pattern
+            });
+        });
+        
+        // Flash border for critical alerts
+        if (trustDynamics.patterns.some(p => p.severity === 'critical')) {
+            overlay.style.borderColor = '#ff0000';
+            setTimeout(() => {
+                overlay.style.borderColor = trustDynamics.hasDetectedDivergence ? '#ffff00' : '#00ff00';
+            }, 500);
+        }
+    }
+    
+    requestAnimationFrame(updateVisualization);
+}
+
+// AI response detection
+function findAIResponses() {
+    const selectors = {
+        chatgpt: '[data-message-author-role="assistant"]',
+        claude: '.assistant-message',
+        generic: '.markdown, .response-content, .ai-response'
+    };
+    
+    let responses = [];
+    Object.values(selectors).forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        responses = responses.concat(Array.from(elements));
+    });
+    
+    return responses;
+}
+
+// Compare responses with debouncing
+function compareResponses() {
+    if (!isMonitoring) return;
+    
+    const responses = findAIResponses();
+    if (responses.length >= 2) {
+        const contents = responses.map(r => r.textContent || '');
+        const lengths = contents.map(c => c.length);
+        const maxDiff = Math.max(...lengths) - Math.min(...lengths);
+        
+        if (maxDiff > divergenceThreshold) {
+            console.log('%c🎯 AI DIVERGENCE DETECTED', 'color: #ff8800; font-weight: bold; font-size: 14px');
+            console.log(`Character difference: ${maxDiff} (threshold: ${divergenceThreshold})`);
+            console.log('Export data for analysis - Press Ctrl+Shift+E or use popup');
+            
+            addToLog({
+                timestamp: Date.now(),
+                type: 'divergence_detected',
+                difference: maxDiff,
+                threshold: divergenceThreshold,
+                url: window.location.href
+            });
+            
+            // Calculate severity based on difference magnitude
+            const severity = Math.min(10, Math.floor(maxDiff / divergenceThreshold));
+            trustDynamics.triggerDivergence(severity);
+            
+            // Visual alert
+            overlay.style.borderColor = '#ff0000';
+            overlay.style.borderWidth = '4px';
+            setTimeout(() => {
+                overlay.style.borderColor = '#ffff00';
+                overlay.style.borderWidth = '2px';
+            }, 2000);
+            
+            // Add divergence alert to panel
+            const timestamp = new Date().toLocaleTimeString();
+            const alert = document.createElement('div');
+            alert.style.color = '#ff8800';
+            alert.textContent = `[${timestamp}] DIVERGENCE: ${maxDiff} chars difference detected`;
+            patternPanel.appendChild(alert);
+            patternPanel.scrollTop = patternPanel.scrollHeight;
+        }
+    }
+}
+
+// Monitor DOM changes with debouncing
+const observer = new MutationObserver(() => {
+    debouncedCompare();
+});
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+});
+
+// Start visualization
+updateVisualization();
+
+// Periodic trust update (only if divergence detected)
+setInterval(() => {
+    if (trustDynamics.hasDetectedDivergence) {
+        trustDynamics.update();
+    }
+}, CONFIG.checkInterval);
+
+// Listen for control messages
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'toggleMonitoring') {
+        isMonitoring = !isMonitoring;
+        sendResponse({ monitoring: isMonitoring });
+    } else if (request.action === 'exportLog') {
+        sendResponse({ log: coordinationLog });
+    }
+});
+
+console.log('%c📊 CoordinationLens Stats:', 'color: #40c0cb; font-weight: bold');
+console.log(`• ${coordinationLog.length} coordination events logged`);
+console.log('• Export formats: JSON, CSV');
+console.log('• Research-grade data collection active');
+console.log('%c💡 Tip: Watch for pattern alerts in the overlay', 'color: #ffff00');
+
+
+
+
+// Hide the old canvas overlay if it exists
+const oldOverlay = document.getElementById('coordination-lens-overlay');
+if (oldOverlay) {
+    oldOverlay.style.display = 'none';
+}
+
+// Make sure our battery meter is visible
+const batteryMeter = document.getElementById('coordination-lens-indicator');
+if (batteryMeter) {
+    batteryMeter.style.display = 'flex';
+}

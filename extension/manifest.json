@@ -5,7 +5,7 @@
   "description": "Real-time visualization of multi-agent AI coordination",
   "author": "Preston Lee Horn",
   "homepage_url": "https://github.com/prestonle/coordination-lens",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "downloads"],
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
