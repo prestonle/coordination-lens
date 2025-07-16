@@ -1,21 +1,3 @@
-// content.js - Performance Optimized Version
-// Load performance utilities
-const script = document.createElement('script');
-script.src = chrome.runtime.getURL('content/performance-utils.js');
-(document.head || document.documentElement).appendChild(script);
-
-// Wait for utilities to load
-setTimeout(() => {
-  const { debounce, StorageManager, ErrorHandler } = window.CoordinationUtils || {};
-  
-  if (!window.CoordinationUtils) {
-    console.error('Performance utilities not loaded');
-    return;
-  }
-
-  // Initialize managers
-  const storageManager = new StorageManager();
-  const errorHandler = new ErrorHandler();
 // Load the coordination analyzer
 const analyzer = new CoordinationAnalyzer();
 
@@ -393,26 +375,3 @@ console.log(`• ${coordinationLog.length} events logged`);
 console.log('• Export formats: JSON, CSV');
 console.log('%c💡 Hover over trust meter for details', 'color: #ffff00');
 
-
-  // Wrap existing functions with error handling and debouncing
-  if (typeof captureCoordinationEvent !== 'undefined') {
-    const originalCapture = captureCoordinationEvent;
-    captureCoordinationEvent = errorHandler.wrap(
-      debounce(originalCapture, 500),
-      'capture-event'
-    );
-  }
-
-  // Add storage quota monitoring
-  setInterval(async () => {
-    const quota = await storageManager.checkQuota();
-    if (quota.percentage > 90) {
-      console.warn(`Storage nearly full: ${quota.percentage.toFixed(1)}%`);
-      chrome.runtime.sendMessage({
-        action: 'STORAGE_WARNING',
-        data: quota
-      });
-    }
-  }, 60000); // Check every minute
-
-}, 1000);

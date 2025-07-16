@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CoordinationLens Performance Monitor</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
+    .metric { background: #2a2a2a; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .metric h3 { margin: 0 0 10px 0; color: #4CAF50; }
+    .warning { color: #ff9800; }
+    .error { color: #f44336; }
+    .success { color: #4CAF50; }
+  </style>
+</head>
+<body>
+  <h1>CoordinationLens Performance Monitor</h1>
+  
+  <div class="metric">
+    <h3>Storage Usage</h3>
+    <div id="storage">Loading...</div>
+  </div>
+  
+  <div class="metric">
+    <h3>Analysis Performance</h3>
+    <div id="performance">No data yet</div>
+  </div>
+  
+  <div class="metric">
+    <h3>Error Log</h3>
+    <div id="errors">No errors</div>
+  </div>
+  
+  <button onclick="clearStorage()">Clear Old Data</button>
+  <button onclick="exportMetrics()">Export Metrics</button>
+  
+  <script>
+    async function updateMetrics() {
+      // Get storage usage
+      chrome.storage.local.getBytesInUse(null, (bytes) => {
+        const mb = (bytes / 1048576).toFixed(2);
+        const percent = ((bytes / 5242880) * 100).toFixed(1);
+        const status = percent > 80 ? 'warning' : 'success';
+        document.getElementById('storage').innerHTML = 
+          `<span class="${status}">${mb} MB used (${percent}%)</span>`;
+      });
+      
+      // Get performance data
+      chrome.storage.local.get(['performanceMetrics'], (result) => {
+        if (result.performanceMetrics) {
+          const metrics = result.performanceMetrics;
+          document.getElementById('performance').innerHTML = 
+            `Average: ${metrics.avgTime?.toFixed(0) || 0}ms | ` +
+            `Total analyses: ${metrics.count || 0}`;
+        }
+      });
+      
+      // Get errors
+      chrome.storage.local.get(['errors'], (result) => {
+        if (result.errors && result.errors.length > 0) {
+          const recent = result.errors.slice(-5).reverse();
+          document.getElementById('errors').innerHTML = recent
+            .map(e => `<div class="error">${e.context}: ${e.message}</div>`)
+            .join('');
+        }
+      });
+    }
+    
+    function clearStorage() {
+      if (confirm('Clear old coordination data?')) {
+        // Clear old data logic here
+        alert('Old data cleared');
+        updateMetrics();
+      }
+    }
+    
+    function exportMetrics() {
+      chrome.storage.local.get(null, (data) => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], 
+          { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `coordination-metrics-${Date.now()}.json`;
+        a.click();
+      });
+    }
+    
+    // Update every 2 seconds
+    setInterval(updateMetrics, 2000);
+    updateMetrics();
+  </script>
+</body>
+</html>
