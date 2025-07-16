@@ -1,41 +1,53 @@
-# CoordinationLens
+# CoordinationLens v1.1 - Experimental Research Prototype
 
-A Chrome extension that detects and visualizes coordination differences between AI responses in real-time.
+## Current Status: TRL 3 (Analytical and Experimental Critical Function)
 
-## Current Status: Working Prototype
+### What This Is
 
-- ✅ Captures responses from ChatGPT and Claude
-- ✅ Compares responses across browser tabs
-- ✅ Detects divergence in content and length
-- ✅ Shows visual alerts when AIs disagree
-- 🚧 Trust dynamics visualization (in progress)
-- 🚧 Advanced pattern detection (planned)
+An experimental Chrome extension exploring semantic divergence detection between AI assistant responses using Jaccard similarity.
 
-## What It Does
+### What This Is NOT
 
-CoordinationLens monitors AI conversations and alerts you when different AIs give significantly different answers to the same question. This helps identify potential coordination failures or disagreements between AI systems.
+- A production-ready tool
+- A validated divergence detector
+- An automated monitoring solution
+- A definitive measure of AI coordination
 
-## Technical Details
+## Actual Functionality (v1.1)
 
-- Chrome Extension (Manifest V3)
-- Real-time response capture using DOM observation
-- Cross-tab communication via Chrome Storage API
-- Visual alerts for divergence detection
+```
+Current Implementation:
+├── Manual copy/paste of AI responses
+├── Jaccard similarity calculation (word-set overlap)
+├── Visual feedback (particle animation)
+├── JSON export of comparisons
+└── Fixed threshold (0.3) for divergence detection
+```
+
+## Known Limitations
+
+1. **No DOM Integration**: Cannot automatically capture AI responses
+2. **Unvalidated Metrics**: Jaccard threshold chosen heuristically
+3. **No Performance Optimization**: May lag with long responses
+4. **Limited Scope**: Only compares two responses at a time
+5. **No Persistence**: Results not saved between sessions
 
 ## Installation
 
-1. Clone this repository
-2. Open Chrome Extensions (chrome://extensions/)
-3. Enable Developer Mode
-4. Click "Load unpacked" and select the `extension` folder
+```bash
+git clone https://github.com/prestonleehorn/coordination-lens
+cd coordination-lens/extension
+# Load unpacked in Chrome developer mode
+```
 
-## Research Purpose
+## Disclaimer
 
-This is a research prototype exploring AI coordination monitoring. Not intended for production use.
+This tool provides experimental divergence detection only. Results should not be used for critical decisions without independent verification.
 
-Part of PROJECT_SUBSTRATE - investigating coordination as fundamental substrate of intelligence.
+## License
 
-## Version 1.1 (Coming Soon)
-- ✨ **Semantic Similarity**: Replaced character count with Jaccard word analysis
-- 🎯 **Real Divergence Detection**: Catches actual disagreements, not just length differences
-- 💡 **Actionable Insights**: Recommendations based on divergence levels
+MIT - Use at your own risk
+
+## Contact
+
+Preston Lee Horn - PLH Labs

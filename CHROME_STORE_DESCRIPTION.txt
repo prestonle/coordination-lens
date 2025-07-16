@@ -1,0 +1,16 @@
+CoordinationLens - Experimental AI Divergence Detector
+
+⚠️ RESEARCH PROTOTYPE - NOT FOR PRODUCTION USE ⚠️
+
+What it does:
+• Manual comparison of AI responses (copy/paste required)
+• Basic word-overlap detection using Jaccard similarity
+• Visual indicator when responses differ significantly
+
+What it does NOT do:
+• NO automated capture from AI websites
+• NO validated accuracy
+• NO real-time monitoring
+
+For researchers and developers only.
+All processing local. No data collection.

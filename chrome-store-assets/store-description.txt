@@ -30,3 +30,4 @@ All analysis happens locally in your browser. No data is sent to external server
 
 📖 OPEN SOURCE:
 https://github.com/prestonle/coordination-lens
+

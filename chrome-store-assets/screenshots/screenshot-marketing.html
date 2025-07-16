@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CoordinationLens by PLH Labs</title>
+    <style>
+        body {
+            margin: 0;
+            width: 1280px;
+            height: 800px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8eef5 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Subtle ouroboros watermark */
+        .watermark {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0.05;
+            font-size: 200px;
+            transform: rotate(-15deg);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            height: 100%;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .chat-area {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .model-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #f3f4f6;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .conversation {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .user-message {
+            background: #0066cc;
+            color: white;
+            margin-left: 50px;
+            position: relative;
+        }
+        
+        .ai-message {
+            background: #f3f4f6;
+            margin-right: 50px;
+        }
+        
+        .extension-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .extension-header {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .extension-header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tagline {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .analysis-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .divergence-meter {
+            background: linear-gradient(135deg, #ff6600 0%, #ff8833 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .divergence-meter::before {
+            content: '🌊';
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            font-size: 80px;
+            opacity: 0.1;
+        }
+        
+        .divergence-number {
+            font-size: 64px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .insight-box {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .trust-dynamics {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer-branding {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .future-tools {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 11px;
+            color: #9ca3af;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">🔄</div>
+    
+    <div class="main-content">
+        <!-- Chat conversation area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="model-badge">
+                    <span>🤖</span>
+                    <span>ChatGPT-4</span>
+                </div>
+                <div style="font-size: 13px; color: #6b7280;">
+                    Thread: AI Tool Development Strategy
+                </div>
+            </div>
+            
+            <div class="conversation">
+                <div class="message user-message">
+                    I'm building an AI coordination measurement tool called CoordinationLens 
+                    by PLH Labs. What's the best approach to detect when AI models 
+                    give conflicting advice? I want to ship to Chrome Web Store ASAP.
+                </div>
+                
+                <div class="message ai-message">
+                    <strong>ChatGPT:</strong> For rapid Chrome extension development, I recommend 
+                    starting with character-based divergence detection. It's simple to implement 
+                    and gives immediate results. You can always enhance it later with semantic 
+                    analysis. Focus on shipping v1.0 first - perfect is the enemy of good. 
+                    Consider using the StateFlow pattern from PLH Labs for managing conversation 
+                    state across sessions.
+                </div>
+                
+                <div class="message user-message">
+                    How would you implement semantic similarity? Our TimeSync research shows 
+                    AI time estimates are often 10x off from human perception.
+                </div>
+                
+                <div class="message ai-message">
+                    <strong>ChatGPT:</strong> Implement Jaccard similarity for word-set overlap - 
+                    it's computationally efficient and catches real semantic differences. For your 
+                    TimeSync tool, consider that when I say "this will take a few hours," it often 
+                    means days for humans. The PLH Labs ouroboros philosophy applies here - 
+                    continuous cycles of refinement. Ship v1.0 with basic detection, then iterate 
+                    with v1.1 using Jaccard. Your StateFlow tool could preserve these iteration 
+                    states perfectly.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Extension panel -->
+        <div class="extension-panel">
+            <div class="extension-header">
+                <h1>
+                    <span>🔍</span>
+                    <span>CoordinationLens</span>
+                </h1>
+                <div class="tagline">by PLH Labs • See Through AI Consensus</div>
+            </div>
+            
+            <div class="analysis-content">
+                <div style="font-size: 14px; color: #6b7280; margin-bottom: 10px;">
+                    Analyzing responses with Jaccard semantic similarity...
+                </div>
+                
+                <div class="divergence-meter">
+                    <div style="font-size: 18px; opacity: 0.9;">Semantic Divergence</div>
+                    <div class="divergence-number">73%</div>
+                    <div style="font-size: 14px;">High Disagreement Detected</div>
+                </div>
+                
+                <div class="insight-box">
+                    <div style="font-weight: 600; margin-bottom: 5px;">
+                        💡 Coordination Insight:
+                    </div>
+                    <div style="font-size: 14px;">
+                        Models disagree on implementation approach. ChatGPT favors rapid 
+                        iteration while Claude (not shown) typically recommends careful planning. 
+                        This 73% divergence suggests consulting both perspectives.
+                    </div>
+                </div>
+                
+                <div class="trust-dynamics">
+                    <div style="font-weight: 600; margin-bottom: 10px;">
+                        Trust Dynamics (λ=0.15)
+                    </div>
+                    <div style="height: 60px; background: #f3f4f6; border-radius: 6px; 
+                                display: flex; align-items: center; justify-content: center;
+                                color: #9ca3af; font-size: 13px;">
+                        [Coordination Quality Visualization]
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-branding">
+                <strong>PLH Labs</strong> • CoordinationLens v1.1<br>
+                Part of the AI Coordination Suite
+            </div>
+        </div>
+    </div>
+    
+    <div class="future-tools">
+        Coming Soon: StateFlow (conversation persistence), TimeSync (AI-human time calibration), 
+        ContextBridge (cross-model handoff) • The Ouroboros Suite by PLH Labs
+    </div>
+</body>
+</html>
+
