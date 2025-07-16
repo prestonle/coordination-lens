@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CoordinationLens Automated Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .test { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .pass { border-left: 4px solid #4CAF50; }
+        .fail { border-left: 4px solid #f44336; }
+        button { background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>CoordinationLens Automated Test Suite</h1>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <div id="results"></div>
+
+    <script src="extension/content/coordination-analyzer.js"></script>
+    <script>
+        const testCases = [
+            {
+                name: "Identical responses",
+                r1: "The capital of France is Paris.",
+                r2: "The capital of France is Paris.",
+                expected: { min: 0, max: 5 }
+            },
+            {
+                name: "Similar meaning",
+                r1: "Machine learning is a subset of artificial intelligence.",
+                r2: "AI includes machine learning as one of its subfields.",
+                expected: { min: 20, max: 40 }
+            },
+            {
+                name: "Conflicting advice",
+                r1: "To learn programming, start with Python. It's beginner-friendly.",
+                r2: "For programming beginners, JavaScript is better for immediate results.",
+                expected: { min: 60, max: 85 }
+            },
+            {
+                name: "Different topics",
+                r1: "The weather today is sunny and warm.",
+                r2: "Quantum computing uses qubits instead of bits.",
+                expected: { min: 85, max: 100 }
+            },
+            {
+                name: "Empty response handling",
+                r1: "",
+                r2: "Some text",
+                expected: { min: 90, max: 100 }
+            },
+            {
+                name: "Special characters",
+                r1: "Test with emojis 😊 and symbols @#$%",
+                r2: "Test with emojis 😊 and symbols @#$%",
+                expected: { min: 0, max: 10 }
+            }
+        ];
+
+        function runAllTests() {
+            const analyzer = new CoordinationAnalyzer();
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Test Results:</h2>';
+            
+            let passed = 0;
+            let failed = 0;
+
+            testCases.forEach((test, index) => {
+                try {
+                    const result = analyzer.detectDivergence(test.r1, test.r2);
+                    const divergencePercent = result.divergence * 100;
+                    
+                    const inRange = divergencePercent >= test.expected.min && 
+                                   divergencePercent <= test.expected.max;
+                    
+                    if (inRange) passed++;
+                    else failed++;
+
+                    results.innerHTML += `
+                        <div class="test ${inRange ? 'pass' : 'fail'}">
+                            <h3>Test ${index + 1}: ${test.name}</h3>
+                            <p>Divergence: ${divergencePercent.toFixed(1)}%</p>
+                            <p>Expected: ${test.expected.min}% - ${test.expected.max}%</p>
+                            <p>Status: ${inRange ? '✅ PASS' : '❌ FAIL'}</p>
+                        </div>
+                    `;
+                } catch (error) {
+                    failed++;
+                    results.innerHTML += `
+                        <div class="test fail">
+                            <h3>Test ${index + 1}: ${test.name}</h3>
+                            <p>Error: ${error.message}</p>
+                            <p>Status: ❌ ERROR</p>
+                        </div>
+                    `;
+                }
+            });
+
+            results.innerHTML += `
+                <div style="margin-top: 20px; font-size: 18px;">
+                    <strong>Summary:</strong> ${passed} passed, ${failed} failed
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
