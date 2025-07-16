@@ -1,0 +1,32 @@
+Detect when AI assistants give conflicting answers. Measure semantic divergence between responses using advanced similarity analysis.
+
+🔍 KEY FEATURES:
+- Semantic Divergence Detection - Goes beyond word counting to measure actual meaning differences
+- Visual Divergence Indicator - Clear percentage showing how much responses differ (0-100%)
+- Manual Comparison Mode - Copy and paste any two AI responses to analyze
+- Trust Dynamics Visualization - Watch coordination quality change over time
+- Export Analysis Data - Save divergence measurements for research or documentation
+
+🎯 PERFECT FOR:
+- Researchers studying AI behavior
+- Developers testing AI consistency
+- Anyone seeking reliable AI assistance
+- Teams evaluating different AI tools
+
+📊 HOW IT WORKS:
+1. Copy responses from any AI assistant (ChatGPT, Claude, Gemini, Perplexity)
+2. Click the CoordinationLens icon
+3. Paste both responses
+4. See the semantic divergence percentage instantly
+
+🔒 PRIVACY FIRST:
+All analysis happens locally in your browser. No data is sent to external servers.
+
+⚡ VERSION 1.1 FEATURES:
+- Jaccard similarity algorithm for accurate semantic analysis
+- Performance optimized with debouncing and storage management
+- Error handling for robust operation
+- Real-time performance monitoring dashboard
+
+📖 OPEN SOURCE:
+https://github.com/prestonle/coordination-lens
